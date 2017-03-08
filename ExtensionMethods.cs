@@ -36,6 +36,7 @@ namespace Dusty.Net
         }
 
 
+        //Returns a string representation of the bits in the address
         public static string ToBinaryString(this IPAddress ipaddress)
         {
             int length = GetBitLength(ipaddress);
@@ -50,61 +51,6 @@ namespace Dusty.Net
 
 
 
-        public static int GetNetworkPrefixLength(this SubnetMask mask)
-        {
-            string errHostBits = "Subnet mask contains bits in host section";
-            int length = 0;
-            bool reachedEndOfPrefix = false;
-
-            foreach (var _byte in mask.GetAddressBytes())
-            {
-                if (reachedEndOfPrefix)
-                {
-                    if (_byte == 0)
-                    {
-                        break;   //move on to next byte
-                    }
-                    else
-                    {
-                        throw new ArgumentException(errHostBits);
-                    }
-
-                }
-
-                //bitwise operators return int
-                int bits = _byte;
-
-                //check each byte, 1 bit at a time
-                for (int i = 0; i < 8; i++)
-                {
-                    //check most significant bit is 1
-                    //0x80 = binary 10000000
-                    if ((bits & 0x80) == 0x80)
-                    {
-                        //bit is 1
-                        length++;
-                        //shift right, i.e. move the next bit into the 8th position. We need to be careful to only ever examine the least-significant 8 bits
-                        bits = bits << 1;
-                    }
-                    else
-                    {
-                        reachedEndOfPrefix = true;
-
-                        //are there any bits left?
-                        if ((bits & 0x7F) > 0)
-                        {
-                            throw new ArgumentException(errHostBits);
-                        }
-                        else
-                        {
-                            break;   //move on to next byte
-                        }
-                    }
-                }
-
-            }
-
-            return length;
-        }
+        
     }
 }

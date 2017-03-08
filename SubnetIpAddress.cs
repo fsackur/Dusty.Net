@@ -8,30 +8,30 @@ using System.Text.RegularExpressions;
 
 namespace Dusty.Net
 {
-    public class CidrIpAddress : IPAddress
+    public class SubnetIpAddress : IPAddress
     {
         //Constructors from base class
-        public CidrIpAddress(byte[] address) : base(address) { }
-        public CidrIpAddress(long newAddress) : base(newAddress) { }
-        public CidrIpAddress(byte[] address, long scopeid) : base(address, scopeid) { }
+        public SubnetIpAddress(byte[] address) : base(address) { }
+        public SubnetIpAddress(long newAddress) : base(newAddress) { }
+        public SubnetIpAddress(byte[] address, long scopeid) : base(address, scopeid) { }
 
         //Extended constructors
-        public CidrIpAddress(byte[] address, byte[] subnetMask) : base(address)
+        public SubnetIpAddress(byte[] address, byte[] subnetMask) : base(address)
         {
             this.subnetMask = new SubnetMask(subnetMask);
         }
 
-        public CidrIpAddress(long newAddress, long subnetMask) : base(newAddress)
+        public SubnetIpAddress(long newAddress, long subnetMask) : base(newAddress)
         {
             this.subnetMask = new SubnetMask(subnetMask);
         }
 
-        public CidrIpAddress(byte[] address, byte[] subnetMask, long scopeid) : base(address, scopeid)
+        public SubnetIpAddress(byte[] address, byte[] subnetMask, long scopeid) : base(address, scopeid)
         {
             this.subnetMask = new SubnetMask(subnetMask);
         }
 
-        public CidrIpAddress(IPAddress ipaddress, SubnetMask subnetMask) : base(ipaddress.GetAddressBytes())
+        public SubnetIpAddress(IPAddress ipaddress, SubnetMask subnetMask) : base(ipaddress.GetAddressBytes())
         {
             this.subnetMask = subnetMask;
         }
@@ -52,6 +52,15 @@ namespace Dusty.Net
             }
         }
 
+        private NetworkAddress network;
+        public NetworkAddress networkAddress
+        {
+            get
+            {
+                return network;
+            }
+        }
+
         public string ToCidrString()
         {
             return string.Format(
@@ -64,6 +73,14 @@ namespace Dusty.Net
         public bool IsInSameSubnet(IPAddress comparisonIp)
         {
             return Utils.IsInSameSubnet(this, comparisonIp);
+        }
+
+        public NetworkAddress GetNetworkAddress()
+        {
+            return new NetworkAddress(
+                new IPAddress(Utils.GetBytes(this.GetNetworkBits())),
+                this.subnetMask
+                );
         }
     }
 
