@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -33,7 +33,35 @@ namespace Dusty.Net
         }
 
 
-        
+        public int GetNetworkPrefixLength()
+        {
+            string errHostBits = "Subnet mask contains bits in host section";
+            BitArray bits = this.GetAddressBits();
+            bool reachedEndOfNetworkBits = false;
+            int length = 0;
+
+            foreach (bool bit in bits)
+            {
+
+                if (bit)
+                {
+                    if (reachedEndOfNetworkBits)
+                    {
+                        throw new ArgumentException(errHostBits);
+                    }
+                    else
+                    {
+                        length++;
+                    }
+                }
+                else
+                {
+                    reachedEndOfNetworkBits = true;
+                }
+            }
+
+            return length;
+        }
 
     }
 }

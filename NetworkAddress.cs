@@ -30,7 +30,7 @@ namespace Dusty.Net
         {
         }
 
-        public override NetworkAddress GetNetworkAddress()
+        new public NetworkAddress GetNetworkAddress()
         {
             return this;
         }
