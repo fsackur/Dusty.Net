@@ -8,36 +8,56 @@ using System.Text.RegularExpressions;
 
 namespace Dusty.Net
 {
-    public class SubnetIpAddress : IPAddress
+    public class SubnetIpAddress : ComparableIPAddress
     {
         //Constructors from base class
-        public SubnetIpAddress(byte[] address) : base(address) { }
-        public SubnetIpAddress(long newAddress) : base(newAddress) { }
-        public SubnetIpAddress(byte[] address, long scopeid) : base(address, scopeid) { }
+        public SubnetIpAddress(byte[] address) : base(address)
+        {
+            init(SubnetMask.GetDefaultValue(this.AddressFamily));
+        }
+        public SubnetIpAddress(long newAddress) : base(newAddress)
+        {
+            init(SubnetMask.GetDefaultValue(this.AddressFamily));
+        }
+        public SubnetIpAddress(byte[] address, long scopeid) : base(address, scopeid)
+        {
+            init(SubnetMask.GetDefaultValue(this.AddressFamily));
+        }
 
         //Extended constructors
         public SubnetIpAddress(byte[] address, byte[] subnetMask) : base(address)
         {
-            this.subnetMask = new SubnetMask(subnetMask);
+            init(new SubnetMask(subnetMask));
         }
 
         public SubnetIpAddress(long newAddress, long subnetMask) : base(newAddress)
         {
-            this.subnetMask = new SubnetMask(subnetMask);
+            init(new SubnetMask(subnetMask));
         }
 
         public SubnetIpAddress(byte[] address, byte[] subnetMask, long scopeid) : base(address, scopeid)
         {
-            this.subnetMask = new SubnetMask(subnetMask);
+            init(new SubnetMask(subnetMask));
         }
 
         public SubnetIpAddress(IPAddress ipaddress, SubnetMask subnetMask) : base(ipaddress.GetAddressBytes())
         {
-            this.subnetMask = subnetMask;
+            init(subnetMask);
         }
 
-        private SubnetMask mask;
-        public SubnetMask subnetMask {
+        private void init(SubnetMask mask)
+        {
+            this.mask = mask;
+            byte[] networkBytes = Utils.GetBytes(Utils.GetNetworkBits(this.GetAddressBits(), mask.NetworkPrefixLength));
+            this.network = new NetworkAddress(
+                new IPAddress(networkBytes),
+                mask
+            );
+        }
+        
+
+        private SubnetMask mask
+        {
             get
             {
                 return mask;
@@ -49,6 +69,13 @@ namespace Dusty.Net
                     throw new ArgumentException("Subnet mask is not of same family as IP address");
                 }
                 this.mask = value;
+            }
+        }
+
+        public SubnetMask subnetMask {
+            get
+            {
+                return mask;
             }
         }
 
@@ -80,8 +107,9 @@ namespace Dusty.Net
             return new NetworkAddress(
                 new IPAddress(Utils.GetBytes(this.GetNetworkBits())),
                 this.subnetMask
-                );
+            );
         }
+
     }
 
 

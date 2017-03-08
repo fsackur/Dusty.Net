@@ -10,6 +10,11 @@ namespace Dusty.Net
 {
     public static class ExtensionMethods
     {
+        public static int GetBitLength(this IPAddress ipaddress)
+        {
+            return ipaddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6 ? 128 : 32;
+        }
+
         public static BitArray GetAddressBits(this IPAddress ipaddress)
         {
             int length = GetBitLength(ipaddress);
@@ -30,27 +35,34 @@ namespace Dusty.Net
             return bitArray;
         }
 
-        public static int GetBitLength(this IPAddress ipaddress)
+        public static BitArray GetNetworkBits(this SubnetIpAddress ipaddress)
         {
-            return ipaddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6 ? 128 : 32;
+            return Utils.GetNetworkBits(
+                ipaddress.GetAddressBits(),
+                ipaddress.subnetMask.GetNetworkPrefixLength()
+            );
         }
 
+        public static BitArray GetHostBits(this SubnetIpAddress ipaddress)
+        {
+            return Utils.GetHostBits(
+                ipaddress.GetAddressBits(),
+                ipaddress.subnetMask.GetNetworkPrefixLength()
+            );
+        }
 
         //Returns a string representation of the bits in the address
         public static string ToBinaryString(this IPAddress ipaddress)
         {
-            int length = GetBitLength(ipaddress);
             BitArray bits = ipaddress.GetAddressBits();
-            StringBuilder sb = new StringBuilder(length);
+            StringBuilder sb = new StringBuilder(bits.Length);
             foreach (var bit in bits)
             {
                 sb.Append((bool)bit ? "1" : "0");
             }
             return sb.ToString();
         }
-
-
-
         
     }
+
 }

@@ -3,12 +3,38 @@ using System.Collections;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
+using System.Net.Sockets;
 
 namespace Dusty.Net
 {
-    public class SubnetMask : IPAddress
+    public class SubnetMask : ComparableIPAddress
     {
+        public static SubnetMask GetDefaultValue(AddressFamily family)
+        {
+            switch (family) {
+
+                case AddressFamily.InterNetworkV6:
+                    return new SubnetMask(
+                        new byte[] {
+                            0xFF, 0xFF, 0xFF, 0xFF,
+                            0xFF, 0xFF, 0xFF, 0xFF,
+                            0xFF, 0xFF, 0xFF, 0xFF,
+                            0xFF, 0xFF, 0xFF, 0xFF
+                        }
+                    );
+
+                case AddressFamily.InterNetwork:
+                    return new SubnetMask(
+                        new byte[] { 0xFF, 0xFF, 0xFF, 0xFF }
+                    );
+
+                default:
+                    throw new ArgumentException(
+                        "Invalid address family"
+                    );
+            }
+        }
+
         //Constructors
         public SubnetMask(byte[] address) : base(address)
         {
